@@ -7,7 +7,6 @@ import RegisterScreen from '../screens/RegisterScreen';
 
 const AuthStack = createStackNavigator();
 
-// Este navegador manejará el flujo de autenticación (bienvenida, login, registro)
 export default function AuthNavigator() {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>

@@ -1,10 +1,10 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
-import { View, ActivityIndicator, StyleSheet } from 'react-native'; // Importar StyleSheet
+import { View, ActivityIndicator, StyleSheet } from 'react-native'; 
 
 import AuthNavigator from '../navigations/AuthNavigator';
-import AppTabs from '../navigations/AppTabs'; // Asegúrate de que AppTabs esté correctamente importado
+import AppTabs from '../navigations/AppTabs'; 
 
 const Stack = createStackNavigator();
 
@@ -22,10 +22,8 @@ export default function MainNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        // Si el usuario está autenticado, muestra las pestañas de la aplicación
         <Stack.Screen name="App" component={AppTabs} />
       ) : (
-        // Si el usuario NO está autenticado, muestra el navegador de autenticación
         <Stack.Screen name="Auth" component={AuthNavigator} />
       )}
     </Stack.Navigator>
@@ -37,6 +35,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#8B0000', // Fondo rojo consistente para la pantalla de carga
+    backgroundColor: '#8B0000', 
   },
 });
