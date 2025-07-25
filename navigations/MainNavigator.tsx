@@ -1,12 +1,10 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native'; // Importar StyleSheet
 
-import WelcomeScreen from '../screens/WelcomeScreen';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import AppTabs from './AppTabs';
+import AuthNavigator from '../navigations/AuthNavigator';
+import AppTabs from '../navigations/AppTabs'; // Asegúrate de que AppTabs esté correctamente importado
 
 const Stack = createStackNavigator();
 
@@ -15,7 +13,7 @@ export default function MainNavigator() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
@@ -24,14 +22,21 @@ export default function MainNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
+        // Si el usuario está autenticado, muestra las pestañas de la aplicación
         <Stack.Screen name="App" component={AppTabs} />
       ) : (
-        <>
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-        </>
+        // Si el usuario NO está autenticado, muestra el navegador de autenticación
+        <Stack.Screen name="Auth" component={AuthNavigator} />
       )}
     </Stack.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#8B0000', // Fondo rojo consistente para la pantalla de carga
+  },
+});

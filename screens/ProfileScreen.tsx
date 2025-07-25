@@ -8,10 +8,14 @@ import { Ionicons } from '@expo/vector-icons';
 export default function ProfileScreen() {
   const { userData } = useAuth();
 
+  // Añadido para depuración: ver el contenido completo de userData
+  console.log("ProfileScreen userData:", userData);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
     } catch (error) {
+      console.error("Error al cerrar sesión:", error); // Añadido para depuración
       Alert.alert("Error", "No se pudo cerrar la sesión.");
     }
   };

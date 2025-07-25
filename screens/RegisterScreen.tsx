@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
-import { auth, firestore } from '../Firebase/Config';
+// Importaciones actualizadas para Realtime Database
+import { auth, database, ref, set } from '../Firebase/Config'; 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function RegisterScreen({ navigation }: any) {
@@ -20,10 +20,16 @@ export default function RegisterScreen({ navigation }: any) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await setDoc(doc(firestore, 'users', user.uid), {
+      // Guardar datos del usuario en Realtime Database
+      // La ruta será users/UID_DEL_USUARIO
+      await set(ref(database, 'users/' + user.uid), {
         username: username,
         phone: phone,
-        email: user.email
+        email: user.email,
+        // Realtime Database no tiene serverTimestamp() directo para este caso de 'set' en el nodo raíz.
+        // Se puede usar new Date().toISOString() o firebase.database.ServerValue.TIMESTAMP
+        // Si usas ServerValue.TIMESTAMP, el valor se escribirá después de que el servidor lo procese.
+        createdAt: new Date().toISOString() 
       });
 
       Alert.alert("Registro Exitoso", "Usuario registrado correctamente.", [
@@ -31,6 +37,7 @@ export default function RegisterScreen({ navigation }: any) {
       ]);
 
     } catch (error: any) {
+      console.error("Error de Registro:", error); // Log para depuración
       Alert.alert("Error de Registro", error.message);
     }
   };
@@ -84,34 +91,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#8B0000', // Fondo rojo oscuro
+    backgroundColor: '#8B0000',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#FFF', // Color del título blanco
+    color: '#FFF',
   },
   input: {
     width: '100%',
     height: 50,
-    backgroundColor: '#FFFFFF', // Fondo de los inputs blanco
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#CCC', // Borde más claro para los inputs
-    color: '#333', // Color del texto dentro del input
+    borderColor: '#CCC',
+    color: '#333',
   },
   button: {
     width: '100%',
-    backgroundColor: '#FFFFFF', // Fondo del botón blanco
+    backgroundColor: '#FFFFFF',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#000000', // Texto del botón negro
+    color: '#000000',
     fontSize: 18,
     fontWeight: 'bold',
   },

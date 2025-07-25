@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, SafeAreaView, ScrollView } from 'react-native';
-import { firestore, auth } from '../Firebase/Config';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+// Importaciones actualizadas para Realtime Database
+import { auth, database, ref, push, serverTimestamp } from '../Firebase/Config'; 
 import { Ionicons } from '@expo/vector-icons';
 
 export default function OperationsScreen() {
@@ -11,51 +11,63 @@ export default function OperationsScreen() {
   const [descripcion, setDescripcion] = useState('');
 
   const handleSave = async () => {
+    console.log("handleSave: Iniciando proceso de guardado.");
     const precioNum = parseFloat(precio);
+
     if (!idOp || !precio || !cantidad || !descripcion) {
       Alert.alert("Error", "Todos los campos son obligatorios.");
+      console.log("handleSave: Campos obligatorios vacíos.");
       return;
     }
     if (precioNum < 0) {
       Alert.alert("Error", "El precio no puede ser negativo. La operación no se guardará.");
+      console.log("handleSave: Precio negativo detectado.");
       return;
     }
 
     const saveData = async () => {
+        console.log("saveData: Intentando guardar la operación en Realtime Database.");
         try {
             const user = auth.currentUser;
             if (user) {
-                await addDoc(collection(firestore, 'users', user.uid, 'transactions'), {
+                console.log("saveData: Usuario autenticado, UID:", user.uid);
+                // Usar push para añadir un nuevo elemento con una clave única generada automáticamente
+                // La ruta será users/UID_DEL_USUARIO/transactions
+                await push(ref(database, 'users/' + user.uid + '/transactions'), {
                     id_operacion: idOp,
                     precio: precioNum,
                     cantidad: parseInt(cantidad, 10),
                     descripcion: descripcion,
-                    createdAt: serverTimestamp()
+                    createdAt: serverTimestamp() // Usamos serverTimestamp de Realtime Database
                 });
-                Alert.alert("Éxito", "La operación se guardó correctamente.");
+                console.log("saveData: Operación guardada con éxito en Realtime Database.");
+                Alert.alert("Éxito", "La operación se realizó con éxito.");
                 setIdOp('');
                 setPrecio('');
                 setCantidad('');
                 setDescripcion('');
             } else {
+                console.log("saveData: No hay usuario autenticado.");
                 Alert.alert("Error", "No hay usuario autenticado.");
             }
-        } catch (error) {
-            console.error("Error al guardar la operación:", error);
-            Alert.alert("Error", "No se pudo guardar la operación.");
+        } catch (error: any) { // Añadido :any para el tipo de error
+            console.error("saveData: Error al guardar la operación:", error);
+            Alert.alert("Error", "No se pudo guardar la operación: " + error.message); // Muestra el mensaje de error de Firebase
         }
     }
 
     if (precioNum < 1 || precioNum > 20) {
+      console.log("handleSave: Monto fuera de rango ($1 - $20). Mostrando confirmación.");
       Alert.alert(
         "Confirmación",
         "El monto está fuera del rango común ($1 - $20). ¿Desea continuar con la operación?",
         [
-          { text: "Cancelar", style: "cancel" },
+          { text: "Cancelar", style: "cancel", onPress: () => console.log("handleSave: Confirmación de monto cancelada.") },
           { text: "Continuar", onPress: saveData }
         ]
       );
     } else {
+      console.log("handleSave: Monto dentro de rango. Llamando a saveData directamente.");
       saveData();
     }
   };
